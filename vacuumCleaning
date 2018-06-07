@@ -1,0 +1,297 @@
+import java.util.Collection;
+import java.util.Collections;
+
+public class MyApp {
+
+    //Room's default value is 100 | 100.
+    public static int[][] room = new int[100][100];
+    public static int position;
+
+    int north;
+    int west;
+    int south;
+    int east;
+
+    int counter = 0;
+
+    public static void roomSize(int x, int y){
+        room = new int[x][y];
+    }
+
+    public static void blockingItems(int items){
+        int itemsAllowedInRoom = room.length * room[0].length / 2;
+        if (items <= itemsAllowedInRoom){
+            for (int i = 0; i<items; i++){
+                double k = Math.random() * room.length;
+                double n = Math.random() * room[0].length;
+                int kk = (int) k;
+                int nn = (int) n;
+                room[kk][nn] = 9;
+            }
+            boolean startingPoint = false;
+            while(!startingPoint){
+                double k = Math.random() * room.length;
+                double n = Math.random() * room[0].length;
+                int kk = (int) k;
+                int nn = (int) n;
+                if(room[kk][nn] == 0){
+                    room[kk][nn] = 1;
+                    position = ((kk * room[0].length) + nn);
+                    startingPoint = true;
+                }
+            }
+            for (int i = 0; i<room.length;i++){
+                for (int k = 0; k<room[i].length;k++){
+                    System.out.print(" " + room[i][k]);
+                }
+                System.out.println();
+            }
+        }
+    }
+
+    private boolean isNorthFree(int x, int y){
+        if (room[x][y]%2 == 1 && position - room[0].length >= 0 && room[x-1][y] != 9 && room[x-1][y] < 1){
+            return true;
+        }
+//        if (room[x][y]%2 == 0 && position - room[0].length >= 0 && room[x-1][y] != 9 && room[x-1][y] > 0){
+//            isEastFree(x,y);
+//        }
+        return false;
+    }
+
+    private boolean isWestFree(int x, int y){
+        if (room[x][y]%2 == 1 && position % room[0].length != 0 && room[x][y-1] != 9  && room[x][y-1] < 1){
+            return true;
+        }
+//        if (room[x][y]%2 == 0 && position % room[0].length != 0 && room[x][y-1] != 9  && room[x][y-1] > 1){
+//            isNorthFree(x,y);
+//        }
+        return false;
+    }
+
+    private boolean isSouthFree(int x, int y){
+        if (room[x][y]%2 == 1 && position + room[0].length <= room.length * room[0].length && room[x+1][y] != 9 && room[x+1][y] < 1){
+            return true;
+        }
+//        if (room[x][y]%2 == 0 && position + room[0].length <= room.length * room[0].length && room[x+1][y] != 9 && room[x+1][y] > 1){
+//            isWestFree(x,y);
+//        }
+        return false;
+    }
+
+    private boolean isEastFree(int x, int y){
+        if (room[x][y]%2 == 1 && position % room[0].length != room[0].length -1 && room[x][y+1] != 9 && room[x][y+1] < 1){
+            return true;
+        }
+//        if (room[x][y]%2 == 0 && position % room[0].length != room[0].length -1 && room[x][y+1] != 9 && room[x][y+1] > 1){
+//            isSouthFree(x,y);
+//        }
+        return false;
+    }
+
+    private void printTable(){
+        System.out.println();
+        for (int i = 0; i<room.length;i++){
+            for (int k = 0; k<room[i].length; k++){
+                System.out.print(" " + room[i][k]);
+            }
+            System.out.println();
+        }
+    }
+
+    private void checkDirections(int x,int y){
+        int[] dirs = new int[4];
+
+        if (position - room[0].length >= 0){
+            north = room[x-1][y];
+            dirs[0] = north;
+        }else{
+            north = 9;
+            dirs[0] = north;
+        }
+        if (position % room[0].length != 0){
+            west = room[x][y-1];
+            dirs[1] = west;
+        }else {
+            west = 9;
+            dirs[1] = west;
+        }
+        if (position + room[0].length <= room.length * room[0].length){
+            south = room[x+1][y];
+            dirs[2] = south;
+        }else {
+            south = 9;
+            dirs[2] = south;
+        }
+        if (position % room[0].length != room[0].length -1){
+            east = room[x][y+1];
+            dirs[3] = east;
+        }else {
+            east = 9;
+            dirs[3] = east;
+        }
+        System.out.println(dirs[0] + " " + dirs[1] + " " + dirs[2] + " " + dirs[3]);
+
+        if (room[x][y] % 2 == 1){
+            int min = 9;
+            for (int i = 0; i<dirs.length; i++){
+                if (dirs[i] < min){
+                    min = dirs[i];
+                }
+                if (i == dirs.length-1){
+                    for (int k = 0; k<dirs.length; k++){
+                        if (min == dirs[k]){
+                            if (k == 0){
+                                position = position - room[0].length;
+                                x--;
+                                System.out.println("NORTH");
+                                break;
+                            } else if (k == 1){
+                                position--;
+                                y--;
+                                System.out.println("WEST");
+                                break;
+                            } else if (k == 2){
+                                position = position + room[0].length;
+                                x++;
+                                System.out.println("SOUTH");
+                                break;
+                            } else {
+                                position++;
+                                y++;
+                                System.out.println("EAST");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            int[] dirsCopy = dirs;
+            int count = 0;
+            for (int i = 3; i>=0; i--){
+                dirs[count] = dirsCopy[i];
+                count++;
+            }
+
+            int min = 9;
+            for (int i = 0; i<dirs.length; i++){
+                if (dirs[i] < min){
+                    min = dirs[i];
+                }
+                if (i == dirs.length-1){
+                    for (int k = 0; k<dirs.length; k++){
+                        if (min == dirs[k]){
+                            if (k == 3){
+                                position = position - room[0].length;
+                                x--;
+                                System.out.println("NORTH");
+                                break;
+                            } else if (k == 2){
+                                position--;
+                                y--;
+                                System.out.println("WEST");
+                                break;
+                            } else if (k == 1){
+                                position = position + room[0].length;
+                                x++;
+                                System.out.println("SOUTH");
+                                break;
+                            } else {
+                                position++;
+                                y++;
+                                System.out.println("EAST");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        printTable();
+//        if (room[x][y] % 2 == 0){
+
+    }
+
+    public void move(){
+
+        boolean run = true;
+
+        while(run){
+
+            counter++;
+            int x = position / room.length;
+            int y = position % room[0].length;
+
+            checkDirections(x,y);
+
+            System.out.println(room[x][y]);
+            System.out.println("x = " + x);
+            System.out.println("y = " + y);
+
+//            if (isNorthFree(x,y)){
+//                position = position - room[0].length;
+//                x--;
+//                System.out.println("NORTH");
+//            } else if (isWestFree(x,y)){
+//                position--;
+//                y--;
+//                System.out.println("WEST");
+//            } else if (isSouthFree(x,y)){
+//                position = position + room[0].length;
+//                x++;
+//                System.out.println("SOUTH");
+//            } else if(isEastFree(x,y)){
+//                position++;
+//                y++;
+//                System.out.println("EAST");
+//            } else {
+//                System.out.println("Out of directions");
+//                run = false;
+//            }
+
+            if (run){
+                System.out.println("x = " + x);
+                System.out.println("y = " + y);
+                room[x][y]++;
+                System.out.println("position: " + position + " value: " + room[x][y]);
+            }
+
+            if (counter == 100){
+                run = false;
+            }
+
+            if(!run) {
+                System.out.println();
+                for (int i = 0; i < room.length; i++) {
+                    for (int k = 0; k < room[i].length; k++) {
+                        System.out.print(" " + room[i][k]);
+                    }
+                    System.out.println();
+                }
+            }
+        }
+
+//        System.out.println();
+//        for (int i = 0; i<room.length;i++){
+//            for (int k = 0; k<room[i].length; k++){
+//                System.out.print(" " + room[i][k]);
+//            }
+//            System.out.println();
+//        }
+
+    }
+
+    public static void main(String[] args) {
+
+        roomSize(10,10);
+        blockingItems(40);
+
+        MyApp app = new MyApp();
+        app.move();
+
+    }
+
+}
